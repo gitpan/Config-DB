@@ -1,4 +1,4 @@
-use Test::More tests => 18;
+use Test::More tests => 20;
 
 my $dbh = DBI->connect( 'DBI:DBM:', undef, undef );
 
@@ -19,8 +19,7 @@ is( $@, '', 'ok call' );
 eval { $cfg->get; };
 like( $@, qr{^Config::DB::get: missing table parameter at t/03_get.t line \d+$}, 'missing table parameter' );
 
-eval { $cfg->get( 'notable' ); };
-like( $@, qr{^Config::DB::get: missing key parameter at t/03_get.t line \d+$}, 'missing key parameter' );
+isa_ok( $cfg->get( 'cfg' ), 'Config::DB::Table', 'missing key parameter' );
 
 eval { $cfg->get( 'notable', 10 ); };
 like( $@, qr{^Config::DB::get: unknown configuration table 'notable' at t/03_get.t line \d+$}, 'missing table' );
@@ -53,3 +52,5 @@ like( $@, qr{^Config::DB::get: missing key '3000' in configuration table 'cfg' a
 
 is( $cfg->get( 'cfg', 3003, 'cvalue' ), $cfg->_cfg( 3003, 'cvalue' ), 'AUTOLOAD 1' );
 is( $cfg->_cfg( 1001 )->{ckey}, 1000, 'AUTOLOAD 2' );
+is( $cfg->_cfg->_1001->_ckey, 1000, 'AUTOLOAD 3' );
+is( $cfg->_cfg( 1001 )->_cvalue, 1, 'AUTOLOAD 4' );

@@ -1,12 +1,14 @@
 package Config::DB;
 
-$Config::DB::VERSION = '0.0.1';
+$Config::DB::VERSION = '0.0.2';
 
 use strict;
 use warnings;
 
-use DBI;
 use Carp;
+use Config::DB::Record;
+use Config::DB::Table;
+use DBI;
 
 
 sub new
@@ -60,8 +62,10 @@ sub get
 	$self->read unless $self->{read};
 
 	croak __PACKAGE__."::get: missing table parameter" unless defined $table;
-	croak __PACKAGE__."::get: missing key parameter"   unless defined $key;
 	croak __PACKAGE__."::get: unknown configuration table '$table'" unless exists $self->{values}->{$table};
+
+	return $self->{values}->{$table} unless defined $key;
+
 	croak __PACKAGE__."::get: missing key '$key' in configuration table '$table'" unless exists $self->{values}->{$table}->{$key};
 
 	return $self->{values}->{$table}->{$key} unless defined $field;
@@ -87,8 +91,19 @@ sub read
 
 	foreach my $table ( keys %{ $self->{tables} } )
 	{
-		eval { $self->{values}->{$table} = $dbh->selectall_hashref( "SELECT $self->{tables}->{$table} AS dbcfg_key, $table.* FROM $table", 'dbcfg_key' ); };
+		my $t;
+
+		eval { $t = $dbh->selectall_hashref( "SELECT $self->{tables}->{$table} AS dbcfg_key, $table.* FROM $table", 'dbcfg_key' ); };
 		croak "$@\n".__PACKAGE__."::read: reading '$table' table" if $@;
+		$self->{values}->{$table} = $t;
+
+		foreach my $key ( keys %$t )
+		{
+			delete $t->{$key}->{dbcfg_key};
+			bless $t->{$key}, 'Config::DB::Record';
+		}
+
+		bless $t, 'Config::DB::Table';
 	}
 
 	$self->{read} = 1;
@@ -137,30 +152,38 @@ relative value is its unique key. It dies on error.
 
 It reads all the configuration tables and closes DB connection. It returns no value. This method is
 iplicitally called on first get call (explicit or by AUTOLOAD). It dies on error, so it is a good
-idea to call it during application init.
+idea to call it during application init. It is usefull to call it on a restart or configuration
+changed event.
 
-=head2 get( $table_name, $key_value [ , $field_name ] )
+=head2 get( $table_name, [ $key_value [ , $field_name ] ] )
 
-It returns a configuration value or a configuration record. Parameter $table_name is the name of
-the table containing requested value or record; parameter $key_value identifies the requested
-record; without $field_name parameter a reference to an HASH containing all the record is returned,
-if provided the method returns the value of that field as a SCALAR. It dies on missing table,
-missing key value or missing field.
+It returns a configuration table, record or value. Parameter $table_name is the name of the table;
+parameter $key_value identifies the requested record; parameter $field_name is the name of the
+field. If parameters $field_name or $key_value are omitted, a L<Config::DB::Record> or a
+L<Config::DB::Table> are returned. It dies on missing table, missing key value or missing field.
 
 =head2 AUTOLOAD
 
 A quicker syntax is offered: following calls are identical...
 
- my $value1 = $cfg->get( 'table1', 1 );
- my $value1 = $cfg->_table1( 1 );
+ my $table1 = $cfg->get( 'table1' );
+ my $table1 = $cfg->_table1;
 
 ... following calls are identical as well.
 
- my $value2 = $cfg->get( 'table2', 2 'field2' );
- my $value2 = $cfg->_table2( 2, 'field2' );
+ my $rec2 = $cfg->get( 'table2', 2 );
+ my $rec2 = $cfg->_table2( 2 );
+ my $rec2 = $cfg->_table2->_2;
+
+... following calls are identical as well.
+
+ my $value3 = $cfg->get( 'table3', 3 'field3' );
+ my $value3 = $cfg->_table3( 3, 'field3' );
+ my $value3 = $cfg->_table3->_3( 'field3' );
+ my $value3 = $cfg->_table3->_3->_field3;
 
 =head1 VERSION
 
-0.0.1
+0.0.2
 
 =cut

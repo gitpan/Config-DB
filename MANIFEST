@@ -1,4 +1,6 @@
 DB.pm
+DB/Record.pm
+DB/Table.pm
 MANIFEST
 Makefile.PL
 t/01_new.t
