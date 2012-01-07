@@ -7,44 +7,42 @@ use warnings;
 
 use Carp;
 
-
 our $AUTOLOAD;
 
-sub AUTOLOAD
-{
-	my ( $self, @pars ) = @_;
-	my $name = $AUTOLOAD;
+sub AUTOLOAD {
+    my ( $self, @pars ) = @_;
+    my $name = $AUTOLOAD;
 
-	$name =~ s/.*://;
+    $name =~ s/.*://;
 
-	croak "Can't locate object method \"$name\" via package \"".__PACKAGE__.'"' unless $name =~ /^_/;
+    croak "Can't locate object method \"$name\" via package \""
+      . __PACKAGE__ . '"'
+      unless $name =~ /^_/;
 
-	$name =~ s/^_//;
+    $name =~ s/^_//;
 
-	return $self->get( $name, @pars );
+    return $self->get( $name, @pars );
 }
 
-sub DESTROY
-{
+sub DESTROY {
 }
 
-sub get
-{
-	my ( $self, $key, $field ) = @_;
+sub get {
+    my ( $self, $key, $field ) = @_;
 
-	croak __PACKAGE__."::get: missing key parameter" unless defined $key;
-	croak __PACKAGE__."::get: missing key '$key' in configuration table" unless exists $self->{$key};
+    croak __PACKAGE__ . "::get: missing key parameter" unless defined $key;
+    croak __PACKAGE__ . "::get: missing key '$key' in configuration table"
+      unless exists $self->{$key};
 
-	return $self->{$key} unless defined $field;
+    return $self->{$key} unless defined $field;
 
-	croak __PACKAGE__."::get: unknown field '$field' for configuration table" unless exists $self->{$key}->{$field};
+    croak __PACKAGE__ . "::get: unknown field '$field' for configuration table"
+      unless exists $self->{$key}->{$field};
 
-	return $self->{$key}->{$field};
+    return $self->{$key}->{$field};
 }
-
 
 1;
-
 
 __END__
 

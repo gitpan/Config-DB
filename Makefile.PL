@@ -2,14 +2,9 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile(
     NAME         => 'Config::DB',
-    PREREQ_PM    => {
-        'DBI' => 0,
-    },
-    VERSION_FROM => 'DB.pm',
-    clean        => {
-        FILES =>
-'*~ .*~ */*~ */.*~ nohup.out cfg* notable*'
-    }
+    PREREQ_PM    => { 'DBI' => 1.616 },
+    VERSION_FROM => 'lib/Config/DB.pm',
+    clean        => { FILES => '*~ .*~ */*~ */.*~ nohup.out cfg* notable*' }
 );
 
 package MY;

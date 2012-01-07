@@ -1,46 +1,43 @@
 package Config::DB::Record;
 
-$Config::DB::Record::VERSION = '0.0.2';
+$Config::DB::Record::VERSION = '0.1';
 
 use strict;
 use warnings;
 
 use Carp;
 
-
 our $AUTOLOAD;
 
-sub AUTOLOAD
-{
-	my ( $self, @pars ) = @_;
-	my $name = $AUTOLOAD;
+sub AUTOLOAD {
+    my ( $self, @pars ) = @_;
+    my $name = $AUTOLOAD;
 
-	$name =~ s/.*://;
+    $name =~ s/.*://;
 
-	croak "Can't locate object method \"$name\" via package \"".__PACKAGE__.'"' unless $name =~ /^_/;
+    croak "Can't locate object method \"$name\" via package \""
+      . __PACKAGE__ . '"'
+      unless $name =~ /^_/;
 
-	$name =~ s/^_//;
+    $name =~ s/^_//;
 
-	return $self->get( $name, @pars );
+    return $self->get( $name, @pars );
 }
 
-sub DESTROY
-{
+sub DESTROY {
 }
 
-sub get
-{
-	my ( $self, $field ) = @_;
+sub get {
+    my ( $self, $field ) = @_;
 
-	croak __PACKAGE__."::get: missing field parameter" unless defined $field;
-	croak __PACKAGE__."::get: unknown field '$field' for configuration table" unless exists $self->{$field};
+    croak __PACKAGE__ . "::get: missing field parameter" unless defined $field;
+    croak __PACKAGE__ . "::get: unknown field '$field' for configuration table"
+      unless exists $self->{$field};
 
-	return $self->{$field};
+    return $self->{$field};
 }
-
 
 1;
-
 
 __END__
 
@@ -74,6 +71,6 @@ A quicker syntax is offered: following calls are identical...
 
 =head1 VERSION
 
-0.0.2
+0.1
 
 =cut
