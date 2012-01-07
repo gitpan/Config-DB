@@ -1,6 +1,6 @@
 package Config::DB::Table;
 
-$Config::DB::Table::VERSION = '0.0.2';
+$Config::DB::Table::VERSION = '0.2';
 
 use strict;
 use warnings;
@@ -83,6 +83,6 @@ A quicker syntax is offered: following calls are identical...
 
 =head1 VERSION
 
-0.0.2
+0.2
 
 =cut

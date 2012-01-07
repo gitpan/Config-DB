@@ -1,5 +1,4 @@
 use Test::More tests => 28;
-use Test::Differences;
 
 my $dbh = DBI->connect( 'DBI:DBM:', undef, undef );
 
